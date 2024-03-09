@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wordpress-ingress
+  annotations:
+    nginx.org/client-max-body-size: 256m
+    nginx.ingress.kubernetes.io/proxy-body-size: 256m
+spec:
+  rules:
+    - host: wordpress-test.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: wordpress
+                port:
+                  number: 80

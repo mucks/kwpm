@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wp-uploads-ini-config
+data:
+  uploads.ini: |
+    file_uploads = On
+    memory_limit = 256M
+    upload_max_filesize = 256M
+    post_max_size = 256M
+    max_execution_time = 600

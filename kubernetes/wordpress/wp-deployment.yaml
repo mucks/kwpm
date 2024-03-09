@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress
+  labels:
+    app: wordpress
+spec:
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: frontend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: frontend
+    spec:
+      containers:
+        - image: wordpress:6-fpm-alpine
+          name: wordpress
+          env:
+            - name: WORDPRESS_DB_HOST
+              value: mariadb.mariadb-wordpress
+            - name: WORDPRESS_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-pass
+                  key: user
+            - name: WORDPRESS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-pass
+                  key: password
+            - name: WORDPRESS_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-pass
+                  key: db_name
+          volumeMounts:
+            - name: wordpress-persistent-storage
+              mountPath: /var/www/html
+            - name: uploads-ini-conf
+              mountPath: /usr/local/etc/php/conf.d/uploads.ini
+              subPath: uploads.ini
+              readOnly: true
+        - image: nginx:alpine
+          name: nginx
+          ports:
+            - containerPort: 80
+              name: nginx
+          volumeMounts:
+            - name: wordpress-persistent-storage
+              mountPath: /var/www/html
+            - name: nginxconf
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
+      volumes:
+        - name: wordpress-persistent-storage
+          persistentVolumeClaim:
+            claimName: wp-pv-claim
+        - configMap:
+            defaultMode: 256
+            name: nginxthroughpass
+            optional: false
+          name: nginxconf
+        - configMap:
+            name: wp-uploads-ini-config
+          name: uploads-ini-conf
