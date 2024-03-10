@@ -5,6 +5,7 @@ metadata:
   labels:
     app: mariadb
 spec:
+  volumeName: kwpm-mariadb-pv
   storageClassName: local-storage
   accessModes:
     - ReadWriteOnce
